@@ -13,10 +13,25 @@ export async function usersRoutes(app: FastifyInstance) {
 
     const { name, email } = createUserBodySchema.parse(request.body)
 
+    const userExists = await database('users').where({ email }).first()
+
+    if (userExists) {
+      return reply.status(400).send({
+        error: 'User alredy exists',
+      })
+    }
+
+    const userId = randomUUID()
+
     await database('users').insert({
-      id: randomUUID(),
+      id: userId,
       name,
       email,
+    })
+
+    reply.cookie('userId', userId, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     })
 
     return reply.status(201).send()
