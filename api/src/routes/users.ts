@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto'
 
 import { database } from '../database'
 
-export async function usersRoutes(app: FastifyInstance) {
+export async function userRoutes(app: FastifyInstance) {
   app.post('/', async (request, reply) => {
     const createUserBodySchema = z.object({
       name: z.string(),
