@@ -39,6 +39,21 @@ export async function mealRoutes(app: FastifyInstance) {
     return { meals }
   })
 
+  app.get('/:id', async (request) => {
+    const { id } = validateParamsSchema(request)
+    const { userId } = request.cookies
+
+    const meal = await database('meals')
+      .where({
+        id,
+        user_id: userId,
+      })
+      .first()
+      .select()
+
+    return { meal }
+  })
+
   app.post('/', async (request, reply) => {
     const { name, description, date, isInDiet } = validateBodySchema(request)
 
