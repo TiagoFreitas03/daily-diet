@@ -21,6 +21,16 @@ export async function mealRoutes(app: FastifyInstance) {
     return data
   }
 
+  function validateParamsSchema(request: FastifyRequest) {
+    const paramsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const params = paramsSchema.parse(request.params)
+
+    return params
+  }
+
   app.post('/', async (request, reply) => {
     const { name, description, date, isInDiet } = validateBodySchema(request)
 
@@ -39,11 +49,7 @@ export async function mealRoutes(app: FastifyInstance) {
   })
 
   app.put('/:id', async (request, reply) => {
-    const updateMealParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = updateMealParamsSchema.parse(request.params)
+    const { id } = validateParamsSchema(request)
     const { userId } = request.cookies
     const { name, description, date, isInDiet } = validateBodySchema(request)
 
@@ -58,6 +64,15 @@ export async function mealRoutes(app: FastifyInstance) {
         id,
         user_id: userId,
       })
+
+    return reply.status(204).send()
+  })
+
+  app.delete('/:id', async (request, reply) => {
+    const { id } = validateParamsSchema(request)
+    const { userId } = request.cookies
+
+    await database('meals').where({ id, user_id: userId }).delete()
 
     return reply.status(204).send()
   })
