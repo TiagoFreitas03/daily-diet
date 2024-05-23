@@ -54,6 +54,40 @@ export async function mealRoutes(app: FastifyInstance) {
     return { meal }
   })
 
+  app.get('/summary', async (request) => {
+    const { userId } = request.cookies
+
+    const meals = await database('meals').where('user_id', userId).select()
+
+    const totalMeals = meals.length
+    const mealsOnDiet = meals.filter((meal) => meal.is_in_diet).length
+    const mealsOffDiet = totalMeals - mealsOnDiet
+
+    const { best: bestOnDietStreak } = meals.reduce(
+      (onDietStreak, meal) => {
+        if (meal.is_in_diet) {
+          onDietStreak.current += 1
+        } else {
+          onDietStreak.current = 0
+        }
+
+        if (onDietStreak.current > onDietStreak.best) {
+          onDietStreak.best = onDietStreak.current
+        }
+
+        return onDietStreak
+      },
+      { best: 0, current: 0 },
+    )
+
+    return {
+      totalMeals: meals.length,
+      mealsOnDiet,
+      mealsOffDiet,
+      bestOnDietStreak,
+    }
+  })
+
   app.post('/', async (request, reply) => {
     const { name, description, date, isInDiet } = validateBodySchema(request)
 
