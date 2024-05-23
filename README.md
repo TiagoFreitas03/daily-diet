@@ -1,4 +1,4 @@
-# Nesse desafio desenvolveremos uma API para controle de dieta diária, a Daily Diet API.
+# API para controle de dieta diária - Daily Diet API.
 
 ### Regras da aplicação
 
